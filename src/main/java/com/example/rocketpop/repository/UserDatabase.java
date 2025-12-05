@@ -8,6 +8,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -27,7 +29,7 @@ public class UserDatabase implements Database {
     private static final String searchUsersQuery = "SELECT * FROM users WHERE username LIKE ?";
     private static final String createUserQuery = "INSERT INTO users (first_name, last_name, title, department, email, country, city, location, username, password, salt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     private static final String getUserIdByUsernameQuery = "SELECT id FROM users WHERE username = ?";
-    private static final String updateUserQuery = "UPDATE users SET first_name = ?, last_name = ?, title = ?, department = ?, email = ?, country = ?, city = ?, location = ? WHERE id = ?";
+    private static final String updateUserQuery = "UPDATE users SET username = ?, password = ?, salt = ?, first_name = ?, last_name = ?, title = ?, department = ?, email = ?, country = ?, city = ?, location = ? WHERE id = ?";
     private static final String deleteUserQuery = "DELETE FROM users WHERE id = ?";
     private static final String deleteUserByUsernameQuery = "DELETE FROM users WHERE username = ?";
     private static final String deleteAllUsersQuery = "DELETE FROM users";
@@ -40,6 +42,9 @@ public class UserDatabase implements Database {
 
         if (users.size() == 0) {
             logger.info("No user found with username: {}", username);
+            for (User user : getAllUsers()) {
+                logger.info("User: {}", user.getUsername());
+            }
             return null;
         }
         logger.info("Found user: {}", users.get(0));
@@ -60,6 +65,10 @@ public class UserDatabase implements Database {
     @Override
     public boolean createUser(User user) {
         logger.info("createUser called with username: {}", user.getUsername());
+        if (userExists(user.getUsername())) {
+            logger.info("User already exists");
+            return false;
+        }
         Object[] args = {
             user.getFirstName(),
             user.getLastName(),
@@ -74,12 +83,8 @@ public class UserDatabase implements Database {
             user.getSalt()
         };
         int count = -1;
-        try {
+
             count = jdbcTemplate.update(createUserQuery, args);
-        } catch (Exception e) {
-            logger.error("Error creating user: {}", e.getMessage());
-            return false;
-        }
 
         if (count < 1) {
             logger.info("User not created");
@@ -92,21 +97,29 @@ public class UserDatabase implements Database {
     @Override
     public boolean updateUser(User user) {
         logger.info("updateUser called with user: {}", user.getUsername());
-        Object[] args = {user.getUsername()};
-        Integer id = jdbcTemplate.queryForObject(getUserIdByUsernameQuery, Integer.class, args);
-        if (id == null) {
-            logger.info("User not found");
+
+        Object []args = new Object[] {
+            user.getUsername(),
+                user.getPassword(),
+                user.getSalt(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getTitle(),
+                user.getDepartment(),
+                user.getEmail(),
+                user.getCountry(),
+                user.getCity(),
+                user.getLocation(),
+                user.getId()
+        };
+
+        int count = -1;
+        try {
+            count = jdbcTemplate.update(updateUserQuery, args);
+        } catch (DataAccessException e) {
+            logger.error("Error updating user: {}", e.getMessage());
             return false;
         }
-        args = new Object[] {
-            user.getUsername(), 
-            user.getPassword(), 
-            user.getEmail() != null ? user.getEmail() : "",
-            user.getTitle() != null ? user.getTitle() : "user",
-            user.getLocation(),
-            id
-        };
-        int count = jdbcTemplate.update(updateUserQuery, args);
 
         if (count == 0) {
             logger.info("User not updated");
@@ -175,5 +188,12 @@ public class UserDatabase implements Database {
             user.setLocation(rs.getInt("location"));
             return user;
         }
+    }
+
+    private boolean userExists(String username) {
+        logger.info("userExists called with username: {}", username);
+        Object[] args = {username};
+        List<User> count = jdbcTemplate.query(getUserQuery, args, new UserMapper());
+        return count.size() > 0;
     }
 }

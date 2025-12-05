@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -19,6 +21,8 @@ import com.example.rocketpop.model.User;
 @SpringBootTest
 @ActiveProfiles("test")
 public class UserDatabaseTests {
+
+    public static final Logger logger = LoggerFactory.getLogger(UserDatabase.class);
 
     @Autowired
     private UserDatabase database;
@@ -66,38 +70,37 @@ public class UserDatabaseTests {
         assertEquals("user3", user3.getUsername());
     }
 
-    @Test @Disabled
+    @Test
     public void testCreateUserAlreadyExists() {
         var user = new User("user1", "test", "salt");
         assertFalse(database.createUser(user));
     }
 
-    @Test @Disabled
+    @Test
     public void testUpdateUser() {
-        fail("Not yet implemented");
+        logger.info("testUpdateUser");
         var user = database.getUser("user1");
-        assertNotNull(user);
-        //user.setUsername("user4");
-        assertTrue(database.updateUser(user));
+        assertNotNull(user, "User is null");
+        user.setUserName("user4");
+        assertTrue(database.updateUser(user), "User not updated");
 
         var user4 = database.getUser("user4");
-        assertNotNull(user4);
+        assertNotNull(user4, "User is null");
         assertEquals("user4", user4.getUsername());
     }
 
-    @Test @Disabled
+    @Test 
     public void testUpdateUserNotFound() {
         var user = new User("user3", "test", "salt");
         assertNotNull(user);
-        assertFalse(database.updateUser(user));
+        assertFalse(database.updateUser(user), "User not updated");
     }
 
-    @Test @Disabled
+    @Test
     public void testDeleteUser() {
         var user = database.getUser("user2");
         assertNotNull(user);
-        fail("Not yet implemented");
-        //assertTrue(database.deleteUser(user.getId()));
+        assertTrue(database.deleteUser(user.getId()));
 
         var users = database.getAllUsers();
         assertEquals(1, users.size());
@@ -117,4 +120,5 @@ public class UserDatabaseTests {
         var users = database.getAllUsers();
         assertEquals(0, users.size());
     }
+
 }

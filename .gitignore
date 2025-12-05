@@ -36,3 +36,6 @@ build/
 
 ### Testbed for JS code ###
 test_js/
+
+logs/
+AGENTS.md
