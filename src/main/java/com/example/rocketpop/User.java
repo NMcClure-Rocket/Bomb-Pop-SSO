@@ -1,19 +1,14 @@
 package com.example.rocketpop;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-// User class used to check if the password given is valid
-
 public class User {
-    private final String passwordHash;   
+    private final String userName;
+    private final String password;  
 
-    public User(String password, PasswordEncoder encoder) {
-
-        this.passwordHash = encoder.encode(password);
+    public User(String userName, String password) {
+        this.userName = userName;
+        this.password = password;
     }
 
-    public boolean checkPassword(String rawPassword, PasswordEncoder encoder) {
-        return encoder.matches(rawPassword, this.passwordHash);
-    }
-
+    public String getUsername() { return userName; }
+    public String getPassword() { return password; }
 }
