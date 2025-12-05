@@ -114,7 +114,6 @@ public class UserDatabase implements Database {
         @Override
         public User mapRow(ResultSet rs, int rowNum) throws SQLException {
             return new User(
-                rs.getInt("id"),
                 rs.getString("username"),
                 rs.getString("password")
             );
