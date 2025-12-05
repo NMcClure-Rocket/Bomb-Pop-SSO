@@ -25,6 +25,8 @@ public class UserDatabase implements Database {
     private static final String getUserQuery = "SELECT * FROM users WHERE username = ?";
     private static final String getAllUsersQuery = "SELECT * FROM users";
     private static final String createUserQuery = "INSERT INTO users (username, password) VALUES (?, ?)";
+    private static final String getUserIdByUsernameQuery = "SELECT id FROM users WHERE username = ?";
+    // TODO:
     private static final String updateUserQuery = "UPDATE users SET username = ?, password = ? WHERE id = ?";
     private static final String deleteUserQuery = "DELETE FROM users WHERE id = ?";
     private static final String deleteAllUsersQuery = "DELETE FROM users";
@@ -71,7 +73,13 @@ public class UserDatabase implements Database {
     @Override
     public boolean updateUser(User user) {
         logger.info("updateUser called with user: {}", user.getUsername());
-        Object[] args = {user.getUsername(), user.getPassword(), user.getId()};
+        Object[] args = {user.getUsername()};
+        Integer id = jdbcTemplate.queryForObject(getUserIdByUsernameQuery, args, Integer.class);
+        if (id == null) {
+            logger.info("User not found");
+            return false;
+        }
+        args = new Object[] {user.getUsername(), user.getPassword(), id};
         int count = jdbcTemplate.update(updateUserQuery, args);
 
         if (count == 0) {
