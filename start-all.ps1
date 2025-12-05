@@ -1,4 +1,4 @@
-# Start both Frontend and Backend servers
+﻿# Start both Frontend and Backend servers
 Write-Host "Starting Rocket Pop SSO - Full Stack" -ForegroundColor Magenta
 Write-Host "========================================" -ForegroundColor Magenta
 Write-Host ""
@@ -17,7 +17,7 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PSScriptRoot
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Magenta
-Write-Host "✓ Both servers are starting..." -ForegroundColor Green
+Write-Host "Both servers are starting..." -ForegroundColor Green
 Write-Host ""
 Write-Host "URLs:" -ForegroundColor Cyan
 Write-Host "  Frontend:     http://localhost:42067" -ForegroundColor White

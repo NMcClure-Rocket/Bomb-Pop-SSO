@@ -89,10 +89,8 @@ public class UserService {
             throw new RuntimeException("Username already exists");
         }
         
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setEmail(email);
+        String encodedPassword = passwordEncoder.encode(password);
+        User user = new User(username, encodedPassword, email);
         user.setTitle(role);
         
         boolean created = userDatabase.createUser(user);
@@ -122,7 +120,7 @@ public class UserService {
         }
         
         if (location != null && !location.isEmpty()) {
-            user.setLocation(location);
+            user.setLocation(Integer.parseInt(location));
         }
         
         boolean updated = userDatabase.updateUser(user);
