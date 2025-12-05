@@ -17,6 +17,15 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    @GetMapping("/ping")
+    public ResponseEntity<?> ping() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "online");
+        response.put("message", "Rocket Pop SSO API is running");
+        response.put("timestamp", System.currentTimeMillis());
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
